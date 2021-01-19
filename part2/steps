@@ -2,10 +2,6 @@ Before:
 - update retry_join
 - update consul ca
 
-On the VM:
-Show the monolith service
-./monolith
-
 On the k8s cluster:
 kubectl apply -f proxy-defaults.yaml
 

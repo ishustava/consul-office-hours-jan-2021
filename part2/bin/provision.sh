@@ -80,7 +80,7 @@ verify_server_hostname = true
 auto_encrypt {
   tls = true
 }
-retry_join = ["10.142.0.6"]
+retry_join = ["10.128.15.193"]
 ports {
   grpc = 8502
 }
