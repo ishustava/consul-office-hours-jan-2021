@@ -1,0 +1,59 @@
+# install consul binary on server vm
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+sudo apt-get update
+sudo apt-get install consul=1.9.1
+
+# install consul and envoy on client vm
+curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $(lsb_release -cs) main"
+sudo apt-get update
+sudo apt-get install consul=1.9.1
+
+sudo apt-get install -y \
+apt-transport-https \
+ca-certificates \
+curl \
+gnupg-agent \
+software-properties-common
+
+curl -sL 'https://getenvoy.io/gpg' | sudo apt-key add -
+apt-key fingerprint 6FF974DB
+
+sudo add-apt-repository \
+"deb [arch=amd64] https://dl.bintray.com/tetrate/getenvoy-deb \
+$(lsb_release -cs) \
+stable"
+
+sudo apt-get install -y getenvoy-envoy=1.16.0.p0.g8fb3cb8-1p69.ga5345f6
+
+-------------------------------------------------------------------------------------------------------------------
+consul tls ca create
+consul tls cert create -server -dc dc-vm -node=*
+
+// both client and server
+sudo mkdir --parents /etc/consul.d
+sudo touch /etc/consul.d/consul.hcl
+sudo chown --recursive consul:consul /etc/consul.d
+sudo chmod 640 /etc/consul.d/consul.hcl
+
+// only server
+sudo touch /etc/consul.d/server.hcl
+sudo chown --recursive consul:consul /etc/consul.d
+sudo chmod 640 /etc/consul.d/server.hcl
+
+// both client and server
+sudo touch /usr/lib/systemd/system/consul.service
+
+sudo systemctl enable consul
+sudo systemctl start consul
+sudo systemctl status consul
+
+
+consul connect envoy -mesh-gateway -register -expose-servers
+
+------------------------------------------------------------------------------------------------------------------]
+
+kubectl create secret generic consul-federation --from-file=caCert=fed-ca.pem --from-file=caKey=fed-ca-key.pem
+
+helm install consul hashicorp/consul -f fed-values.yaml
