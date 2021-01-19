@@ -1,0 +1,12 @@
+apiVersion: consul.hashicorp.com/v1alpha1
+kind: ServiceRouter
+metadata:
+  name: counting
+spec:
+  routes:
+    - match:
+        http:
+          pathExact: /
+      destination:
+        service: monolith
+        prefixRewrite: /count
